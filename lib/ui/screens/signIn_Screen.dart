@@ -91,4 +91,10 @@ class _SigninScreenState extends State<SigninScreen> {
   void _onTapSignUpButton(){
 
   }
+
+  void dispose(){
+    _emailTEController.dispose();
+    _passwordTEController.dispose();
+    super.dispose();
+  }
 }
