@@ -3,6 +3,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../widgets/screen_background.dart';
+import 'forgot_password_email_screen.dart';
+
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -77,6 +79,7 @@ class _SignInScreenState extends State<SignInScreen> {
                             style: TextStyle(color: Colors.grey),
                           ),
                         ),
+                        SizedBox(height: 10,),
                         RichText(
                           text: TextSpan(
                             text: "Don't have an account? ",
@@ -119,6 +122,7 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   void _onTapForgotPasswordButton() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => ForgotPasswordEmailScreen(),));
 
   }
 
