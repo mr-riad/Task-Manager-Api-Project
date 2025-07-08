@@ -83,6 +83,9 @@ class _SigninScreenState extends State<SigninScreen> {
   }
 
   void _onTapSignInButton(){
+    if (_formKey.currentState!.validate()) {
+      // TODO: Sign in with API
+    }
 
 
   }
