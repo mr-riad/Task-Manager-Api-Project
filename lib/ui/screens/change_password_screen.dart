@@ -1,7 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:task_manager/ui/screens/sign_in_screen.dart';
-import 'package:task_manager/ui/widgets/screen_background.dart';
+import 'package:task_manager_api/ui/screens/sign_in_screen.dart';
+
+import '../../widgets/screen_background.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});

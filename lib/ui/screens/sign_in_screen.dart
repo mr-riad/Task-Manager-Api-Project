@@ -1,8 +1,11 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:task_manager_api/ui/screens/sign_up_screen.dart';
 
 import '../../widgets/screen_background.dart';
+import 'forgot_password_email_screen.dart';
+import 'main_nav_bar_holder_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -115,15 +118,16 @@ class _SignInScreenState extends State<SignInScreen> {
     if (_formKey.currentState!.validate()) {
       // TODO: Sign in with API
     }
-
+    Navigator.pushNamedAndRemoveUntil(
+        context, MainNavBarHolderScreen.name, (predicate) => false);
   }
 
   void _onTapForgotPasswordButton() {
-
+    Navigator.pushNamed(context, ForgotPasswordEmailScreen.name);
   }
 
   void _onTapSignUpButton() {
-
+    Navigator.pushNamed(context, SignUpScreen.name);
   }
 
   @override
