@@ -1,10 +1,15 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:task_manager_api/ui/screens/sign_up_screen.dart';
 
 import '../../widgets/screen_background.dart';
 import 'forgot_password_email_screen.dart';
+<<<<<<< HEAD:lib/ui/screens/signIn_Screen.dart
 
+=======
+import 'main_nav_bar_holder_screen.dart';
+>>>>>>> task-manger:lib/ui/screens/sign_in_screen.dart
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -118,16 +123,21 @@ class _SignInScreenState extends State<SignInScreen> {
     if (_formKey.currentState!.validate()) {
       // TODO: Sign in with API
     }
-
+    Navigator.pushNamedAndRemoveUntil(
+        context, MainNavBarHolderScreen.name, (predicate) => false);
   }
 
   void _onTapForgotPasswordButton() {
+<<<<<<< HEAD:lib/ui/screens/signIn_Screen.dart
     Navigator.push(context, MaterialPageRoute(builder: (context) => ForgotPasswordEmailScreen(),));
 
+=======
+    Navigator.pushNamed(context, ForgotPasswordEmailScreen.name);
+>>>>>>> task-manger:lib/ui/screens/sign_in_screen.dart
   }
 
   void _onTapSignUpButton() {
-
+    Navigator.pushNamed(context, SignUpScreen.name);
   }
 
   @override

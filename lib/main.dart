@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:task_manager_api/app.dart';
 
-import 'app.dart';
-
-void main(){
+void main() {
+ WidgetsFlutterBinding.ensureInitialized();
  runApp(TaskManagerApp());
 }
