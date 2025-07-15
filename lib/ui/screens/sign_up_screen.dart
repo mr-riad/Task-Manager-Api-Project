@@ -1,7 +1,10 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:task_manager_api/data/service/network_caller.dart';
+import 'package:task_manager_api/widgets/snack_bar_message.dart';
 
+import '../../data/urls.dart';
 import '../../widgets/screen_background.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -20,6 +23,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _phoneTEController = TextEditingController();
   final TextEditingController _passwordTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _signUpInProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -102,9 +106,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _onTapSignUpButton,
-                    child: Icon(Icons.arrow_circle_right_outlined),
+                  Visibility(
+                    visible: _signUpInProgress == false,
+                    replacement: Center(child: CircularProgressIndicator()),
+                    child: ElevatedButton(
+                      onPressed: _onTapSignUpButton,
+                      child: Icon(Icons.arrow_circle_right_outlined),
+                    ),
                   ),
                   const SizedBox(height: 32),
                   Center(
@@ -124,8 +132,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               fontWeight: FontWeight.w700,
                             ),
                             recognizer:
-                            TapGestureRecognizer()
-                              ..onTap = _onTapSignInButton,
+                                TapGestureRecognizer()
+                                  ..onTap = _onTapSignInButton,
                           ),
                         ],
                       ),
@@ -142,9 +150,48 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void _onTapSignUpButton() {
     if (_formKey.currentState!.validate()) {
-      // TODO: Sign in with API
+      _signUp();
     }
   }
+
+  //================ Api Part ============
+
+  Future<void> _signUp() async {
+    _signUpInProgress = true;
+    setState(() {});
+    Map<String, String> requestBody = {
+      "email": _emailTEController.text.trim(),
+      "firstName": _firstNameTEController.text.trim(),
+      "lastName": _lastNameTEController.text.trim(),
+      "mobile": _phoneTEController.text.trim(),
+      "password": _passwordTEController.text,
+    };
+    NetworkResponse response = await NetworkCaller.postRequest(
+      url: Urls.registrationUrl,
+      body: requestBody,
+    );
+    _signUpInProgress = false;
+    setState(() {});
+    if (response.isSuccess) {
+      _clearTextField();
+      showSnackBarMessage(
+        context,
+        'Registration has been success. Please login',
+      );
+    } else {
+      showSnackBarMessage(context, response.errorMessage!);
+    }
+  }
+
+  void _clearTextField() {
+    _firstNameTEController.clear();
+    _lastNameTEController.clear();
+    _emailTEController.clear();
+    _phoneTEController.clear();
+    _passwordTEController.clear();
+  }
+
+  //================ Api Part ============End
 
   void _onTapSignInButton() {
     Navigator.pop(context);
