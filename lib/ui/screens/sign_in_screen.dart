@@ -1,7 +1,12 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:task_manager_api/data/models/user_model.dart';
+import 'package:task_manager_api/data/service/network_caller.dart';
+import 'package:task_manager_api/data/urls.dart';
+import 'package:task_manager_api/ui/controllers/auth_controller.dart';
 import 'package:task_manager_api/ui/screens/sign_up_screen.dart';
+import 'package:task_manager_api/widgets/snack_bar_message.dart';
 
 import '../../widgets/screen_background.dart';
 import 'forgot_password_email_screen.dart';
@@ -24,6 +29,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _emailTEController = TextEditingController();
   final TextEditingController _passwordTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _signInProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -69,9 +75,13 @@ class _SignInScreenState extends State<SignInScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _onTapSignInButton,
-                    child: Icon(Icons.arrow_circle_right_outlined),
+                  Visibility(
+                    visible: _signInProgress == false,
+                    replacement: CircularProgressIndicator(),
+                    child: ElevatedButton(
+                      onPressed: _onTapSignInButton,
+                      child: Icon(Icons.arrow_circle_right_outlined),
+                    ),
                   ),
                   const SizedBox(height: 32),
                   Center(
@@ -101,8 +111,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                   fontWeight: FontWeight.w700,
                                 ),
                                 recognizer:
-                                TapGestureRecognizer()
-                                  ..onTap = _onTapSignUpButton,
+                                    TapGestureRecognizer()
+                                      ..onTap = _onTapSignUpButton,
                               ),
                             ],
                           ),
@@ -121,10 +131,13 @@ class _SignInScreenState extends State<SignInScreen> {
 
   void _onTapSignInButton() {
     if (_formKey.currentState!.validate()) {
-      // TODO: Sign in with API
+      _signIn();
     }
     Navigator.pushNamedAndRemoveUntil(
-        context, MainNavBarHolderScreen.name, (predicate) => false);
+      context,
+      MainNavBarHolderScreen.name,
+      (predicate) => false,
+    );
   }
 
   void _onTapForgotPasswordButton() {
@@ -134,6 +147,37 @@ class _SignInScreenState extends State<SignInScreen> {
 =======
     Navigator.pushNamed(context, ForgotPasswordEmailScreen.name);
 >>>>>>> task-manger:lib/ui/screens/sign_in_screen.dart
+  }
+
+  Future<void> _signIn() async {
+    _signInProgress = true;
+    setState(() {});
+    Map<String, String> requestBody = {
+      "email": _emailTEController.text.trim(),
+      "password": _passwordTEController.text,
+    };
+
+    NetworkResponse response = await NetworkCaller.postRequest(
+      url: Urls.logInUrl,
+      body: requestBody,
+    );
+    if (response.isSuccess) {
+
+      UserModel userModel = UserModel.fromJson(response.body!['data']);
+      String token = response.body!['token'];
+      await AuthController.saveUserData(userModel, token);
+
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        MainNavBarHolderScreen.name,
+        (predicate) => false,
+      );
+    } else {
+      _signInProgress = false;
+      setState(() {});
+      showSnackBarMessage(context, response.errorMessage!);
+    }
   }
 
   void _onTapSignUpButton() {

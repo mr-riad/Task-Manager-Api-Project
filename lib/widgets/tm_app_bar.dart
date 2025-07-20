@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:task_manager_api/ui/controllers/auth_controller.dart';
 
 import '../ui/screens/sign_in_screen.dart';
 import '../ui/screens/update_profile_screen.dart';
@@ -16,6 +17,8 @@ class TMAppBar extends StatefulWidget implements PreferredSizeWidget {
 class _TMAppBarState extends State<TMAppBar> {
   @override
   Widget build(BuildContext context) {
+    final user = AuthController.userModel;
+
     return AppBar(
       backgroundColor: Colors.green,
       title: GestureDetector(
@@ -24,37 +27,49 @@ class _TMAppBarState extends State<TMAppBar> {
           children: [
             CircleAvatar(),
             const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Rahim Hasan',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
+            if (user != null)
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user.fullName,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'rahim@gmail.com',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white,
+                    Text(
+                      user.email,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              )
+            else
+              const Expanded(
+                child: Text(
+                  'Loading...',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
+            IconButton(
+              onPressed: _onTapLogOutButton,
+              icon: Icon(Icons.logout),
             ),
-            IconButton(onPressed: _onTapLogOutButton, icon: Icon(Icons.logout)),
           ],
         ),
       ),
     );
   }
 
-  void _onTapLogOutButton() {
+  void _onTapLogOutButton() async{
+    await AuthController.clearData();
     Navigator.pushNamedAndRemoveUntil(
         context, SignInScreen.name, (predicate) => false);
   }
