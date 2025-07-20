@@ -1,8 +1,10 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:task_manager_api/data/models/user_model.dart';
 import 'package:task_manager_api/data/service/network_caller.dart';
 import 'package:task_manager_api/data/urls.dart';
+import 'package:task_manager_api/ui/controllers/auth_controller.dart';
 import 'package:task_manager_api/ui/screens/sign_up_screen.dart';
 import 'package:task_manager_api/widgets/snack_bar_message.dart';
 
@@ -124,7 +126,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   void _onTapSignInButton() {
     if (_formKey.currentState!.validate()) {
-      // TODO: Sign in with API
+      _signIn();
     }
     Navigator.pushNamedAndRemoveUntil(
       context,
@@ -140,21 +142,30 @@ class _SignInScreenState extends State<SignInScreen> {
   Future<void> _signIn() async {
     _signInProgress = true;
     setState(() {});
-    Map<String, String> reguestBody = {
+    Map<String, String> requestBody = {
       "email": _emailTEController.text.trim(),
       "password": _passwordTEController.text,
     };
 
     NetworkResponse response = await NetworkCaller.postRequest(
       url: Urls.logInUrl,
-      body: reguestBody,
+      body: requestBody,
     );
-    if(response.isSuccess){
-      Navigator.pushAndRemoveUntil(
-          context, MainNavBarHolderScreen.name,
-              (predicate)=>false);
-    }
-    else{
+    if (response.isSuccess) {
+
+      UserModel userModel = UserModel.fromJson(response.body!['data']);
+      String token = response.body!['token'];
+      await AuthController.saveUserData(userModel, token);
+
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        MainNavBarHolderScreen.name,
+        (predicate) => false,
+      );
+    } else {
+      _signInProgress = false;
+      setState(() {});
       showSnackBarMessage(context, response.errorMessage!);
     }
   }
