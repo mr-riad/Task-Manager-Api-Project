@@ -1,9 +1,17 @@
-import 'package:email_validator/email_validator.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../widgets/screen_background.dart';
-import '../../widgets/tm_app_bar.dart';
+import '../../data/models/user_model.dart';
+import '../../data/service/network_caller.dart';
+import '../../data/urls.dart';
+import '../controllers/auth_controller.dart';
+import '../widgets/centered_circular_progress_indicator.dart';
+import '../widgets/screen_background.dart';
+import '../widgets/snack_bar_message.dart';
+import '../widgets/tm_app_bar.dart';
+
 
 class UpdateProfileScreen extends StatefulWidget {
   const UpdateProfileScreen({super.key});
@@ -23,6 +31,16 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ImagePicker _imagePicker = ImagePicker();
   XFile? _selectedImage;
+  bool _updateProfileInProgress = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailTEController.text = AuthController.userModel?.email ?? '';
+    _firstNameTEController.text = AuthController.userModel?.firstName ?? '';
+    _lastNameTEController.text = AuthController.userModel?.lastName ?? '';
+    _phoneTEController.text = AuthController.userModel?.mobile ?? '';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,14 +67,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                   TextFormField(
                     controller: _emailTEController,
                     textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(hintText: 'Email'),
-                    validator: (String? value) {
-                      String email = value ?? '';
-                      if (EmailValidator.validate(email) == false) {
-                        return 'Enter a valid email';
-                      }
-                      return null;
-                    },
+                    enabled: false,
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -101,16 +112,23 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                     obscureText: true,
                     decoration: InputDecoration(hintText: 'Password'),
                     validator: (String? value) {
-                      if ((value?.length ?? 0) <= 6) {
-                        return 'Enter a valid password';
+                      int length = value?.length ?? 0;
+
+                      if (length > 0 && length <= 6) {
+                        return 'Enter a password more than 6 letters';
                       }
+
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _onTapSubmitButton,
-                    child: Icon(Icons.arrow_circle_right_outlined),
+                  Visibility(
+                    visible: _updateProfileInProgress == false,
+                    replacement: CenteredCircularProgressIndicator(),
+                    child: ElevatedButton(
+                      onPressed: _onTapSubmitButton,
+                      child: Icon(Icons.arrow_circle_right_outlined),
+                    ),
                   ),
                 ],
               ),
@@ -156,10 +174,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
             Text(
               _selectedImage == null ? 'Select image' : _selectedImage!.name,
               maxLines: 1,
-              style: TextStyle(
-                  overflow: TextOverflow.ellipsis
-              ),
-            )
+              style: TextStyle(overflow: TextOverflow.ellipsis),
+            ),
           ],
         ),
       ),
@@ -168,7 +184,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
 
   Future<void> _onTapPhotoPicker() async {
     final XFile? pickedImage = await _imagePicker.pickImage(
-        source: ImageSource.gallery);
+      source: ImageSource.gallery,
+    );
     if (pickedImage != null) {
       _selectedImage = pickedImage;
       setState(() {});
@@ -177,7 +194,66 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
 
   void _onTapSubmitButton() {
     if (_formKey.currentState!.validate()) {
-      // TODO: Update profile with API
+      _updateProfile();
+    }
+  }
+
+  Future<void> _updateProfile() async {
+    _updateProfileInProgress = true;
+    if (mounted) {
+      setState(() {});
+    }
+
+    Uint8List? imageBytes;
+
+    Map<String, String> requestBody = {
+      "email": _emailTEController.text,
+      "firstName": _firstNameTEController.text.trim(),
+      "lastName": _lastNameTEController.text.trim(),
+      "mobile": _phoneTEController.text.trim(),
+    };
+
+    if (_passwordTEController.text.isNotEmpty) {
+      requestBody['password'] = _passwordTEController.text;
+    }
+
+    if (_selectedImage != null) {
+      imageBytes = await _selectedImage!.readAsBytes();
+      requestBody['photo'] = base64Encode(imageBytes);
+    }
+
+    NetworkResponse response = await NetworkCaller.postRequest(
+      url: Urls.updateProfileUrl,
+      body: requestBody,
+    );
+
+    _updateProfileInProgress = false;
+    if (mounted) {
+      setState(() {});
+    }
+
+    if (response.isSuccess) {
+      UserModel userModel = UserModel(
+          id: AuthController.userModel!.id,
+          email: _emailTEController.text,
+          firstName: _firstNameTEController.text.trim(),
+          lastName: _lastNameTEController.text.trim(),
+          mobile: _phoneTEController.text.trim(),
+          photo: imageBytes == null
+              ? AuthController.userModel?.photo
+              : base64Encode(imageBytes)
+      );
+
+      await AuthController.updateUserData(userModel);
+
+      _passwordTEController.clear();
+      if (mounted) {
+        showSnackBarMessage(context, 'Profile updated');
+      }
+    } else {
+      if (mounted) {
+        showSnackBarMessage(context, response.errorMessage!);
+      }
     }
   }
 

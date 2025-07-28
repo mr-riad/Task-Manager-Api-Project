@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:task_manager_api/ui/controllers/auth_controller.dart';
-import 'package:task_manager_api/ui/screens/main_nav_bar_holder_screen.dart';
 import 'package:task_manager_api/ui/screens/sign_in_screen.dart';
 
-import '../../utils/asset_paths.dart';
-import '../../widgets/screen_background.dart';
+import '../controllers/auth_controller.dart';
+import '../utils/asset_paths.dart';
+import '../widgets/screen_background.dart';
+import 'main_nav_bar_holder_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -24,13 +24,11 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _moveToNextScreen() async {
-    await Future.delayed(Duration(seconds: 3));
-
+    await Future.delayed(Duration(seconds: 2));
     bool isLoggedIn = await AuthController.isUserLoggedIn();
-    if(isLoggedIn){
+    if (isLoggedIn) {
       Navigator.pushReplacementNamed(context, MainNavBarHolderScreen.name);
-    }
-    else{
+    } else {
       Navigator.pushReplacementNamed(context, SignInScreen.name);
     }
   }

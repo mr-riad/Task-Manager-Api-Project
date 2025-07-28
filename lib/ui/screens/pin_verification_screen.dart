@@ -2,8 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:task_manager_api/ui/screens/sign_in_screen.dart';
-
-import '../../widgets/screen_background.dart';
+import '../widgets/screen_background.dart';
 import 'change_password_screen.dart';
 
 class PinVerificationScreen extends StatefulWidget {

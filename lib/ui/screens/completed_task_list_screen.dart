@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets/task_card.dart';
-
 class CompletedTaskListScreen extends StatefulWidget {
   const CompletedTaskListScreen({super.key});
 
@@ -17,9 +15,9 @@ class _CompletedTaskListScreenState extends State<CompletedTaskListScreen> {
       child: ListView.builder(
         itemCount: 10,
         itemBuilder: (context, index) {
-          return TaskCard(
-            taskType: TaskType.completed,
-          );
+          // return TaskCard(
+          //   taskType: TaskType.completed,
+          // );
         },
       ),
     );
